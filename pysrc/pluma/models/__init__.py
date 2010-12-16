@@ -1,0 +1,115 @@
+import re
+from datetime import datetime, date, timedelta
+
+from mongoengine import *
+from mongoengine.django.auth import User as Auth_User
+from mongoengine.connection import _get_db
+import pymongo
+
+class User(Auth_User):
+    
+    def get_inbox(self):
+        return GeneralEnvelope.objects.filter(recipient=self).order_by('-updated_date')
+
+
+class Contribution(Document):
+    # Basic information
+    title = StringField(required=True)
+    author = ReferenceField(User)
+    creation_date = DateTimeField(required=True, default=datetime.now)
+    updated_date = DateTimeField(required=True, default=datetime.now)
+    
+    # Access information
+    is_public = BooleanField(default=False)
+    accessors = ListField(ReferenceField(User))
+    
+    # Content
+    rendered_content = StringField(required=True)
+    
+    type = StringField(default='plain')
+    
+    content_type = 'text/plain'
+    
+    def __init__(self, **values):
+        self._new_accessors = []
+        super(Contribution, self).__init__(**values)
+        
+    @classmethod
+    def factory(cls, id=None, type=None):
+        if id is None and type is None:
+            return None
+        
+        if id:
+            values = _get_db().contribution.find_one({'_id': pymongo.objectid.ObjectId(id)})
+            
+            if values is None:
+                return None
+            values.setdefault('type')
+            type = values['type']
+        elif type:
+            values = {}
+        
+        
+        if type == 'html':
+            return HtmlContribution(**values)
+        else:
+            return Contribution(**values)
+        
+    @classmethod
+    def get_all(cls):
+        return cls.objects.all()
+    
+    def save(self):
+        super(Contribution, self).save()
+        for acc in self._new_accessors:
+            envelope = Envelope.create(self, acc)
+            envelope.save()
+            
+    def add_accessor(self, accessor):
+        self._new_accessors.append(accessor)
+        if accessor in self.accessors:
+            self.accessors.append(accessor)
+            return True
+        return False
+
+class HtmlContribution(Contribution):
+    content_type = 'text/html'
+    type = StringField(default='html')
+
+class Envelope(Document):
+    '''Corresponds to a row in the user's mail box.
+    '''
+    title = StringField(required=True)
+    author = ReferenceField(User)
+    contribution = ReferenceField(Contribution)
+    creation_date = DateTimeField(required=True, default=datetime.now)
+    updated_date = DateTimeField(required=True, default=datetime.now)
+    
+    @classmethod
+    def create(cls, contribution, accessor):
+        if True: # general account
+            envelope = GeneralEnvelope()
+            envelope.title = contribution.title
+            envelope.author = contribution.author
+            envelope.contribution = contribution
+            envelope.recipient = accessor
+            return envelope
+        elif False: # group access
+            pass
+        elif False: # premium account
+            pass
+    
+class PremiumEnvelope(Envelope):
+    pass
+
+class GeneralEnvelope(Envelope):
+    '''Evenlope used in the standard mailbox.
+    '''
+    recipient = ReferenceField(User)
+    
+class PublicEnvelope(Envelope):
+    '''Placed in the public inbox; used for public access.
+    '''
+    pass
+
+
