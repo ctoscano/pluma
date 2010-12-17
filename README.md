@@ -6,7 +6,7 @@
 * pymongo
 * gridfs
 * flup
-
+* python-markdown
 
 ## Gotchas
 * Ubuntu .pth files only appear to work in dist-packages (as opposed to site-packages)

@@ -23,5 +23,5 @@ default_dictionary = {
 
 'cont_type_name_plain':'Plain Text',
 'cont_type_name_html':'HTML',
-
+'cont_type_name_markdown':'Markdown',
 }

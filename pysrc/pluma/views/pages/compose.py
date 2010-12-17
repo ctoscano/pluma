@@ -20,14 +20,14 @@ class Compose(Page):
         
         form.add(csrf_token(self.c.request))
         form.add(new.input(type="text", name="title", value=self.contrib['title'] or 'title'))
-        form.add(new.textarea(name="content", style="width:100%;height:300px").addHTML(self.contrib.rendered_content or 'content'))
+        form.add(new.textarea(name="content", style="width:100%;height:300px").addHTML(self.contrib.get_text() or 'content'))
         form.add(new.button(type='submit').add(_('submit_publish')))
         
         # only for new contributions
         #TODO: support some switching
         if '_id' not in self.contrib:
             select = new.select(name='type')
-            for type in ('plain', 'html'):
+            for type in ('plain', 'html', 'markdown'):
                 option = new.option(value=type).add(_('cont_type_name_%s' % type))
                 select.add(option)
             form.add(select)

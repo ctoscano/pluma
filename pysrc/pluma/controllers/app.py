@@ -49,7 +49,7 @@ def compose(request, id=None):
     
     if c.request.POST:
         contrib.title = c.request.POST.get('title')
-        contrib.rendered_content = c.request.POST.get('content')
+        contrib.set_text(c.request.POST.get('content'))
         contrib.save()
         return HttpResponseRedirect('/')
 

@@ -1,10 +1,12 @@
 import re
+import pymongo
+import markdown
 from datetime import datetime, date, timedelta
 
 from mongoengine import *
 from mongoengine.django.auth import User as Auth_User
 from mongoengine.connection import _get_db
-import pymongo
+
 
 class User(Auth_User):
     
@@ -50,6 +52,8 @@ class Contribution(Document):
         
         if type == 'html':
             return HtmlContribution._from_son(values)
+        elif type == 'markdown':
+            return MarkdownContribution._from_son(values)
         else:
             return Contribution._from_son(values)
         
@@ -74,9 +78,26 @@ class Contribution(Document):
             self.accessors.append(accessor)
             return True
         return False
+    
+    def get_text(self):
+        return self.rendered_content
+    
+    def set_text(self, text):
+        self.rendered_content = text
 
 class HtmlContribution(Contribution):
     content_type = 'text/html'
+    
+class MarkdownContribution(Contribution):
+    raw_content = StringField(required=True)
+    content_type = 'text/html'
+    
+    def get_text(self):
+        return self.raw_content
+        
+    def set_text(self, text):
+        self.raw_content = text
+        self.rendered_content = markdown.markdown(text, ['codehilite', 'extra', 'toc'], 'escape')
 
 class Envelope(Document):
     '''Corresponds to a row in the user's mail box.
