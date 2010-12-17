@@ -113,7 +113,8 @@ class GeneralEnvelope(Envelope):
     def touch(cls, contrib):
         '''updates all envelopes with new modification date
         '''
-        _get_db().envelope.update({'contribution':unicode(contrib[contrib._meta['id_field']])}, {'$set':{'updated_date':datetime.now()}})
+        _get_db().envelope.update({'contribution':unicode(contrib[contrib._meta['id_field']])}, 
+                                  {'$set':{'updated_date':datetime.now(), 'title':contrib.title}})
     
 class PublicEnvelope(Envelope):
     '''Placed in the public inbox; used for public access.

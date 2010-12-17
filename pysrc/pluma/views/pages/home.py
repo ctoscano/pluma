@@ -15,6 +15,7 @@ class Home(Page):
         super(Home, self).__init__(context, _('title_home'))
 
         if self.c.user.is_authenticated():
+            self.body.add('hello %s ' % self.c.user.username)
             self.body.add(new.a(href=self.c.get_url('inbox')
                                 ).add('Inbox'))
             self.body.add(new.a(href=self.c.get_url('compose')
