@@ -29,7 +29,6 @@ class Compose(Page):
             select = new.select(name='type')
             for type in ('plain', 'html'):
                 option = new.option(value=type).add(_('cont_type_name_%s' % type))
-                if self.contrib.type == type: option.set(selected='true')
                 select.add(option)
             form.add(select)
         

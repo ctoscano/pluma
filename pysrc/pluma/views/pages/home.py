@@ -33,10 +33,10 @@ class Home(Page):
         for doc in self.contributions:
             p = new.p
             table.add(p)
-            a = new.a(href=self.c.get_url('doc', id=doc.contribution._id)).add(doc.title)
+            a = new.a(href=self.c.get_url('doc', id=doc.contribution)).add(doc.title)
             p.add(a)
             p.add(' (')
-            a = new.a(href=self.c.get_url('edit', id=doc.contribution._id)).add('edit')
+            a = new.a(href=self.c.get_url('edit', id=doc.contribution)).add('edit')
             p.add(a)
             p.add(') ')
         

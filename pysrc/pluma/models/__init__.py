@@ -26,8 +26,6 @@ class Contribution(Document):
     # Content
     rendered_content = StringField(required=True)
     
-    type = StringField(default='plain')
-    
     content_type = 'text/plain'
     
     def __init__(self, **values):
@@ -51,39 +49,43 @@ class Contribution(Document):
         
         
         if type == 'html':
-            return HtmlContribution(**values)
+            return HtmlContribution._from_son(values)
         else:
-            return Contribution(**values)
+            return Contribution._from_son(values)
         
     @classmethod
     def get_all(cls):
         return cls.objects.all()
     
     def save(self):
-        super(Contribution, self).save()
+        super(Contribution, self).save(True)
+        already_touched = []
         for acc in self._new_accessors:
             envelope = Envelope.create(self, acc)
             envelope.save()
+            already_touched.append(acc)
+        for acc in self.accessors:
+            if acc in already_touched: continue
+            GeneralEnvelope.touch(self)
             
     def add_accessor(self, accessor):
         self._new_accessors.append(accessor)
-        if accessor in self.accessors:
+        if accessor not in self.accessors:
             self.accessors.append(accessor)
             return True
         return False
 
 class HtmlContribution(Contribution):
     content_type = 'text/html'
-    type = StringField(default='html')
 
 class Envelope(Document):
     '''Corresponds to a row in the user's mail box.
     '''
     title = StringField(required=True)
     author = ReferenceField(User)
-    contribution = ReferenceField(Contribution)
-    creation_date = DateTimeField(required=True, default=datetime.now)
-    updated_date = DateTimeField(required=True, default=datetime.now)
+    contribution = StringField(required=True) # faster than reference field
+    created = DateTimeField(required=True, default=datetime.now)
+    updated = DateTimeField(required=True, default=datetime.now)
     
     @classmethod
     def create(cls, contribution, accessor):
@@ -91,7 +93,7 @@ class Envelope(Document):
             envelope = GeneralEnvelope()
             envelope.title = contribution.title
             envelope.author = contribution.author
-            envelope.contribution = contribution
+            envelope.contribution = unicode(contribution[contribution._meta['id_field']])
             envelope.recipient = accessor
             return envelope
         elif False: # group access
@@ -106,6 +108,12 @@ class GeneralEnvelope(Envelope):
     '''Evenlope used in the standard mailbox.
     '''
     recipient = ReferenceField(User)
+    
+    @classmethod
+    def touch(cls, contrib):
+        '''updates all envelopes with new modification date
+        '''
+        _get_db().envelope.update({'contribution':unicode(contrib[contrib._meta['id_field']])}, {'$set':{'updated_date':datetime.now()}})
     
 class PublicEnvelope(Envelope):
     '''Placed in the public inbox; used for public access.

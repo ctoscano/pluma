@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from pluma.controllers import Context
 from pluma.views.pages.home import Home
 from pluma.views.pages.compose import Compose
-from pluma.models import Contribution, User
+from pluma.models import Contribution, User, GeneralEnvelope
 from pluma.views.pages.signup import SignUp
 from django.contrib.auth import login, logout
 from pluma.views.pages.signin import SignIn
@@ -52,7 +52,7 @@ def compose(request, id=None):
         contrib.rendered_content = c.request.POST.get('content')
         contrib.save()
         return HttpResponseRedirect('/')
-    
+
     return HttpResponse(Compose(c, contrib))
 
 def doc(request, id):
