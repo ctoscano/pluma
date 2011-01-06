@@ -84,6 +84,10 @@ class Contribution(Document):
     
     def set_text(self, text):
         self.rendered_content = text
+    
+    def get_draft_text(self, user):
+        draft = Draft.get_draft(user, self._id)
+        return draft.content if draft else self.get_text() 
 
 class HtmlContribution(Contribution):
     content_type = 'text/html'
@@ -98,6 +102,41 @@ class MarkdownContribution(Contribution):
     def set_text(self, text):
         self.raw_content = text
         self.rendered_content = markdown.markdown(text, ['codehilite', 'extra', 'toc'], 'escape')
+
+class Draft(Document):
+    author = StringField(required=True, db_field='a')
+    contribution = StringField(required=True, db_field='c')
+    content = StringField()
+    
+    meta = {
+        'allow_inheritance': False,
+    }
+    
+    def set_user(self, user):
+        self.author = user._id
+        
+    def set_contribution(self, contrib):
+        self.contrib = contrib._id
+        
+    @classmethod
+    def get_draft(cls, user, contrib_id):
+        '''returns target object or None'''
+        draft =  Draft.objects.filter(author=str(user._id), 
+                                contribution=str(contrib_id)).first()
+        return draft
+    
+    @classmethod
+    def save_draft(cls, user, contrib):
+        _get_db().draft.update({'a':unicode(user._id),
+                                'c':unicode(contrib._id)}, 
+                               {'$set':{'content':contrib.get_text()}}, 
+                               upsert=True)
+        
+    @classmethod
+    def remove(cls, user, contrib):
+        _get_db().draft.remove({'a':unicode(user._id),
+                                'c':unicode(contrib._id)})
+        
 
 class Envelope(Document):
     '''Corresponds to a row in the user's mail box.
@@ -141,5 +180,4 @@ class PublicEnvelope(Envelope):
     '''Placed in the public inbox; used for public access.
     '''
     pass
-
 

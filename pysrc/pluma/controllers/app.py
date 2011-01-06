@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from pluma.controllers import Context
 from pluma.views.pages.home import Home
 from pluma.views.pages.compose import Compose
-from pluma.models import Contribution, User, GeneralEnvelope
+from pluma.models import Contribution, User, Draft
 from pluma.views.pages.signup import SignUp
 from django.contrib.auth import login, logout
 from pluma.views.pages.signin import SignIn
@@ -15,7 +15,6 @@ from django.contrib.auth.decorators import login_required
 
 def index(request):
     c = Context(request)
-    
     page = Home(c, [] if c.user.is_anonymous() else c.user.get_inbox())
     return HttpResponse(page)
 
@@ -50,8 +49,15 @@ def compose(request, id=None):
     if c.request.POST:
         contrib.title = c.request.POST.get('title')
         contrib.set_text(c.request.POST.get('content'))
-        contrib.save()
-        return HttpResponseRedirect('/')
+        if c.request.POST.get('save', False):
+            Draft.save_draft(c.user, contrib)
+        elif c.request.POST.get('discard', False):
+            Draft.remove(c.user, contrib)
+            return HttpResponseRedirect('/')
+        else:
+            contrib.save()
+            Draft.remove(c.user, contrib)
+            return HttpResponseRedirect('/')
 
     return HttpResponse(Compose(c, contrib))
 

@@ -17,6 +17,8 @@ default_dictionary = {
 'title_home':'plu.ma - write for yourself, your friends, and your fans',
 'title_compose':'compose - plu.ma',
 'submit_publish':'Publish!',
+'submit_save':'Save',
+'discard':'Discard',
 'Sign Up':'Sign Up',
 'Sign In':'Sign In',
 
