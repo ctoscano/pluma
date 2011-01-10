@@ -39,7 +39,7 @@ def compose(request, id=None):
     if id:  
         contrib = Contribution.factory(id)
         if not contrib: 
-            return HttpResponse('not found', status=404)
+            return _404(request)
     else:   
         #TODO: validate 'type' 
         contrib = Contribution.factory(type=c.request.POST.get('type', 'plain'))
@@ -49,22 +49,32 @@ def compose(request, id=None):
     if c.request.POST:
         contrib.title = c.request.POST.get('title')
         contrib.set_text(c.request.POST.get('content'))
-        if c.request.POST.get('save', False):
+        contrib.set_domain(c.request.POST.get('domain', False))
+        if c.request.POST.get('save', False):           # Save draft
             Draft.save_draft(c.user, contrib)
-        elif c.request.POST.get('discard', False):
+        elif c.request.POST.get('discard', False):      # Discard draft
             Draft.remove(c.user, contrib)
             return HttpResponseRedirect('/')
         else:
-            contrib.save()
+            contrib.save()                              # Save Version
             Draft.remove(c.user, contrib)
             return HttpResponseRedirect('/')
 
     return HttpResponse(Compose(c, contrib))
 
-def doc(request, id):
+def doc(request, id, domain=None):
     c = Context(request)
-    doc = Contribution.factory(id)
-    return HttpResponse(doc.rendered_content, content_type=doc.content_type) 
+    doc = Contribution.factory(id, domain=domain)
+    if doc:
+        return HttpResponse(doc.rendered_content, content_type=doc.content_type)
+    else: 
+        return _404(request)
+
+def doc_in_domain(request, id):
+    '''same as doc, but filters documents associated with a specific domain
+    '''
+    domain = request.META['SERVER_NAME']
+    return doc(request, id, domain)
 
 def signup(request):
     c = Context(request)
@@ -82,7 +92,8 @@ def signin(request):
         if user and user.check_password(c.request.POST.get('password')):
             user.backend = 'mongoengine.django.auth.MongoEngineBackend'
             login(c.request, user)
-            return HttpResponse('signed in')
+            return HttpResponseRedirect(c.request.GET.get('next', '/'))
+                
     return HttpResponse(SignIn(c))
 
 def signout(request):
@@ -90,6 +101,7 @@ def signout(request):
     return HttpResponse('signed out')
 
 def inbox(request):
-    c = Context(request)
-    return HttpResponse('signed out')
+    return index(request)
 
+def _404(request):
+    return HttpResponse('not found', status=404)

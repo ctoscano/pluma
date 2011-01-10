@@ -74,6 +74,10 @@ AUTHENTICATION_BACKENDS = (
     'mongoengine.django.auth.MongoEngineBackend',
 )
 
+LOGIN_URL = '/signin/'
+LOGOUT_URL = '/signout/'
+LOGIN_REDIRECT_URL = '/profile/'
+
 SESSION_ENGINE = 'mongoengine.django.sessions'
 
 ROOT_URLCONF = 'urls'

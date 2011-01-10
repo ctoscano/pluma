@@ -26,6 +26,11 @@ class Compose(Page):
         form.add(new.input(type='submit', value=_('submit_save'), name="save"))
         form.add(new.input(type='submit', value=_('discard'), name="discard"))
         
+        # Optional
+        form.add(new.input(type='text', value=_('domain'), name="domain"))
+        # Optional
+        form.add(new.input(type='text', value=_('uri'), name="uri"))
+        
         # only for new contributions
         #TODO: support some switching
         if '_id' not in self.contrib:

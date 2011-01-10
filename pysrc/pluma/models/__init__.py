@@ -20,6 +20,8 @@ class Contribution(Document):
     author = ReferenceField(User)
     creation_date = DateTimeField(required=True, default=datetime.now)
     updated_date = DateTimeField(required=True, default=datetime.now)
+    domain = StringField(required=False, db_field='D')
+    url = StringField(required=False, db_field='U')
     
     # Access information
     is_public = BooleanField(default=False)
@@ -35,12 +37,15 @@ class Contribution(Document):
         super(Contribution, self).__init__(**values)
         
     @classmethod
-    def factory(cls, id=None, type=None):
+    def factory(cls, id=None, type=None, domain=None):
         if id is None and type is None:
             return None
         
         if id:
-            values = _get_db().contribution.find_one({'_id': pymongo.objectid.ObjectId(id)})
+            query = {'_id': pymongo.objectid.ObjectId(id)}
+            if domain: 
+                query['D'] = domain
+            values = _get_db().contribution.find_one(query)
             
             if values is None:
                 return None
@@ -86,8 +91,14 @@ class Contribution(Document):
         self.rendered_content = text
     
     def get_draft_text(self, user):
+        if not hasattr(self, '_id'): return ''         # new contribution; no content
+        
         draft = Draft.get_draft(user, self._id)
         return draft.content if draft else self.get_text() 
+    
+    def set_domain(self, domain):
+        if domain not in (False, None, '', 'Domain'):
+            self.domain = domain
 
 class HtmlContribution(Contribution):
     content_type = 'text/html'
@@ -134,8 +145,9 @@ class Draft(Document):
         
     @classmethod
     def remove(cls, user, contrib):
-        _get_db().draft.remove({'a':unicode(user._id),
-                                'c':unicode(contrib._id)})
+        if hasattr(contrib, '_id'):
+            _get_db().draft.remove({'a':unicode(user._id),
+                                    'c':unicode(contrib._id)})
         
 
 class Envelope(Document):

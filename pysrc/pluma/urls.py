@@ -23,4 +23,6 @@ urlpatterns = patterns('',
     url(r'signup', app.signup, name='signup'),
     url(r'signin', app.signin, name='signin'),
     url(r'signout', app.signout, name='signout'),
+    url(r'profile', app._404, name='profile'),
+    url(r'(?P<id>.*)', app.doc_in_domain, name='doc_in_domain'),
 )
