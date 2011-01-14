@@ -27,9 +27,9 @@ class Compose(Page):
         form.add(new.input(type='submit', value=_('discard'), name="discard"))
         
         # Optional
-        form.add(new.input(type='text', value=_('domain'), name="domain"))
+        form.add(new.input(type='text', value=self.contrib.domain or _('domain'), name="domain"))
         # Optional
-        form.add(new.input(type='text', value=_('uri'), name="uri"))
+        form.add(new.input(type='text', value=self.contrib.uri or _('uri'), name="uri"))
         
         # only for new contributions
         #TODO: support some switching

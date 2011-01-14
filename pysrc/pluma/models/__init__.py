@@ -21,7 +21,7 @@ class Contribution(Document):
     creation_date = DateTimeField(required=True, default=datetime.now)
     updated_date = DateTimeField(required=True, default=datetime.now)
     domain = StringField(required=False, db_field='D')
-    url = StringField(required=False, db_field='U')
+    uri = StringField(required=False, db_field='U')
     
     # Access information
     is_public = BooleanField(default=False)
@@ -37,14 +37,18 @@ class Contribution(Document):
         super(Contribution, self).__init__(**values)
         
     @classmethod
-    def factory(cls, id=None, type=None, domain=None):
-        if id is None and type is None:
+    def factory(cls, id=None, type=None, domain=None, uri=None):
+        if id is None and type is None and (domain is None and uri is None):
             return None
         
-        if id:
+        if id or (domain and uri):
             query = {'_id': pymongo.objectid.ObjectId(id)}
             if domain: 
                 query['D'] = domain
+            if domain and uri:
+                query['U'] = uri
+                del query['_id']
+            
             values = _get_db().contribution.find_one(query)
             
             if values is None:
@@ -96,9 +100,14 @@ class Contribution(Document):
         draft = Draft.get_draft(user, self._id)
         return draft.content if draft else self.get_text() 
     
-    def set_domain(self, domain):
-        if domain not in (False, None, '', 'Domain'):
+    def set_url(self, domain, uri):
+        #TODO: better input validation
+        if domain not in (False, None, '', 'Domain') and uri not in ('URI', False):
             self.domain = domain
+            self.uri = uri
+            return True
+        else:
+            return False
 
 class HtmlContribution(Contribution):
     content_type = 'text/html'

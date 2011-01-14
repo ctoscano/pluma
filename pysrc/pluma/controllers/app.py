@@ -49,7 +49,8 @@ def compose(request, id=None):
     if c.request.POST:
         contrib.title = c.request.POST.get('title')
         contrib.set_text(c.request.POST.get('content'))
-        contrib.set_domain(c.request.POST.get('domain', False))
+        contrib.set_url(c.request.POST.get('domain', False),
+                        c.request.POST.get('uri', False))
         if c.request.POST.get('save', False):           # Save draft
             Draft.save_draft(c.user, contrib)
         elif c.request.POST.get('discard', False):      # Discard draft
@@ -62,19 +63,19 @@ def compose(request, id=None):
 
     return HttpResponse(Compose(c, contrib))
 
-def doc(request, id, domain=None):
+def doc(request, id, domain=None, uri=None):
     c = Context(request)
-    doc = Contribution.factory(id, domain=domain)
+    doc = Contribution.factory(id, domain=domain, uri=uri)
     if doc:
         return HttpResponse(doc.rendered_content, content_type=doc.content_type)
     else: 
         return _404(request)
 
-def doc_in_domain(request, id):
+def doc_in_domain(request, uri):
     '''same as doc, but filters documents associated with a specific domain
     '''
     domain = request.META['SERVER_NAME']
-    return doc(request, id, domain)
+    return doc(request, None, domain, uri)
 
 def signup(request):
     c = Context(request)

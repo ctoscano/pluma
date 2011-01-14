@@ -24,5 +24,5 @@ urlpatterns = patterns('',
     url(r'signin', app.signin, name='signin'),
     url(r'signout', app.signout, name='signout'),
     url(r'profile', app._404, name='profile'),
-    url(r'(?P<id>.*)', app.doc_in_domain, name='doc_in_domain'),
+    url(r'(?P<uri>.*)', app.doc_in_domain, name='doc_in_domain'),
 )
