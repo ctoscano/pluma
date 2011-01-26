@@ -21,7 +21,7 @@ class Compose(Page):
         form.add(csrf_token(self.c.request))
         form.add(new.input(type="text", name="title", value=self.contrib['title'] or 'title'))
         form.add(new.textarea(name="content", style="width:100%;height:300px").
-                 addHTML(self.contrib.get_draft_text(self.c.user) or 'content'))
+                 add(self.contrib.get_draft_text(self.c.user) or 'content'))
         form.add(new.button(type='submit').add(_('submit_publish')))
         form.add(new.input(type='submit', value=_('submit_save'), name="save"))
         form.add(new.input(type='submit', value=_('discard'), name="discard"))
