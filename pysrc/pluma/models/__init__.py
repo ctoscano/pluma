@@ -28,7 +28,7 @@ class Contribution(Document):
     accessors = ListField(ReferenceField(User))
     
     # Content
-    rendered_content = StringField(required=True)
+    rendered_content = StringField(required=True, default='')
     
     content_type = 'text/plain'
     
@@ -89,16 +89,18 @@ class Contribution(Document):
         return False
     
     def get_text(self):
+        '''must return a string'''
         return self.rendered_content
     
     def set_text(self, text):
         self.rendered_content = text
     
     def get_draft_text(self, user):
-        if not hasattr(self, '_id'): return ''         # new contribution; no content
-        
-        draft = Draft.get_draft(user, self._id)
-        return draft.content if draft else self.get_text() 
+        if not hasattr(self, '_id'):                # new contribution; no draft
+            return self.get_text()       
+        else: 
+            draft = Draft.get_draft(user, self._id)
+            return draft.content if draft else self.get_text() 
     
     def set_url(self, domain, uri):
         #TODO: better input validation
@@ -113,7 +115,7 @@ class HtmlContribution(Contribution):
     content_type = 'text/html'
     
 class MarkdownContribution(Contribution):
-    raw_content = StringField(required=True)
+    raw_content = StringField(required=True, default='')
     content_type = 'text/html'
     
     def get_text(self):
@@ -125,15 +127,23 @@ class MarkdownContribution(Contribution):
 
 class Draft(Document):
     author = StringField(required=True, db_field='a')
-    contribution = StringField(required=True, db_field='c')
-    content = StringField()
+    contribution = StringField(db_field='c')
+    title = StringField(required=True, db_field='t') # used for drafts tab
+    content = StringField(db_field='txt', default='')
     
     meta = {
         'allow_inheritance': False,
     }
     
+    @classmethod
+    def get_user_drafts(cls, user):
+        drafts = []
+        if hasattr(user, '_id') and user._id != '':
+            drafts =  Draft.objects.filter(author=str(user._id))
+        return drafts
+    
     def set_user(self, user):
-        self.author = user._id
+        self.author = unicode(user._id)
         
     def set_contribution(self, contrib):
         self.contrib = contrib._id
@@ -146,17 +156,33 @@ class Draft(Document):
         return draft
     
     @classmethod
+    def with_id(cls, user, draft_id):
+        return cls.objects.filter(author=str(user._id)).with_id(draft_id)
+    
+    @classmethod
     def save_draft(cls, user, contrib):
-        _get_db().draft.update({'a':unicode(user._id),
-                                'c':unicode(contrib._id)}, 
-                               {'$set':{'content':contrib.get_text()}}, 
+        ''' @param user: required
+            @param contrib: ignoring id if blank; always use text
+        '''
+        main_vars = {'a':unicode(user._id)}
+        
+        # Only set contribution ID if ID not blank
+        if hasattr(contrib, '_id') and contrib._id != '': 
+            main_vars['c'] = unicode(contrib._id)
+        
+        _get_db().draft.update(main_vars, 
+                               {'$set':{'txt':contrib.get_text(),
+                                        't':contrib.title}}, 
                                upsert=True)
         
     @classmethod
-    def remove(cls, user, contrib):
+    def remove(cls, user=False, contrib=False, draft=False):
         if hasattr(contrib, '_id'):
             _get_db().draft.remove({'a':unicode(user._id),
                                     'c':unicode(contrib._id)})
+        elif hasattr(draft, '_id'):
+            _get_db().draft.remove({'a':unicode(user._id),
+                                    '_id':pymongo.objectid.ObjectId(draft._id)})
         
 
 class Envelope(Document):
@@ -165,8 +191,8 @@ class Envelope(Document):
     title = StringField(required=True)
     author = ReferenceField(User)
     contribution = StringField(required=True) # faster than reference field
-    created = DateTimeField(required=True, default=datetime.now)
-    updated = DateTimeField(required=True, default=datetime.now)
+    created_date = DateTimeField(required=True, default=datetime.now)
+    updated_date = DateTimeField(required=True, default=datetime.now)
     
     @classmethod
     def create(cls, contribution, accessor):

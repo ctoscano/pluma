@@ -12,6 +12,7 @@ from pluma.views.pages.signup import SignUp
 from django.contrib.auth import login, logout
 from pluma.views.pages.signin import SignIn
 from django.contrib.auth.decorators import login_required
+from pluma.views.pages.drafts import Drafts
 
 def index(request):
     c = Context(request)
@@ -33,8 +34,23 @@ def info(request):
     return HttpResponse(page)
 
 @login_required
-def compose(request, id=None):
+def drafts(request):
     c = Context(request)
+    page = Drafts(c, Draft.get_user_drafts(c.user))
+    return HttpResponse(page)
+
+@login_required
+def draft(request, id):
+    c = Context(request)
+    draft = Draft.with_id(c.user, id)
+    return compose(request, 
+                   draft.contribution if hasattr(draft, 'contribution') else None, 
+                   draft, 
+                   c)
+
+@login_required
+def compose(request, id=None, draft=None, c=None):
+    c = c or Context(request)
     
     if id:  
         contrib = Contribution.factory(id)
@@ -51,15 +67,32 @@ def compose(request, id=None):
         contrib.set_text(c.request.POST.get('content'))
         contrib.set_url(c.request.POST.get('domain', False),
                         c.request.POST.get('uri', False))
-        if c.request.POST.get('save', False):           # Save draft
-            Draft.save_draft(c.user, contrib)
+        if c.request.POST.get('save', False): # Save draft
+            if hasattr(contrib, '_id'):       # Editing contribution's draft
+                Draft.save_draft(c.user, contrib)
+            else: # There is no contribution associated with this draft 
+                if draft:               # modify existing draft
+                    draft.content = c.request.POST.get('content')
+                    draft.title = c.request.POST.get('title')
+                    draft.save()
+                else: 
+                    draft = Draft()     # Saving new draft
+                    draft.set_user(c.user)
+                    draft.content = c.request.POST.get('content')
+                    draft.title = c.request.POST.get('title')
+                    draft.save(force_insert=True)
+                    draft_url = c.get_url('draft', id=draft[draft._meta['id_field']])
+                    return HttpResponseRedirect(draft_url)        
         elif c.request.POST.get('discard', False):      # Discard draft
-            Draft.remove(c.user, contrib)
+            Draft.remove(user=c.user, contrib=contrib, draft=draft)
             return HttpResponseRedirect('/')
         else:
             contrib.save()                              # Save Version
             Draft.remove(c.user, contrib)
             return HttpResponseRedirect('/')
+    elif draft:
+        contrib.title = draft.title                 # Not POSTING new info,  
+        contrib.set_text(draft.content)             # but editing draft
 
     return HttpResponse(Compose(c, contrib))
 

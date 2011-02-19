@@ -20,6 +20,8 @@ class Home(Page):
                                 ).add('Inbox'))
             self.body.add(new.a(href=self.c.get_url('compose')
                             ).add('compose'))
+            self.body.add(new.a(href=self.c.get_url('drafts')
+                            ).add('drafts'))
             self.body.add(new.a(href=self.c.get_url('signout')
                             ).add('Sign Out'))
         else:

@@ -24,6 +24,8 @@ default_dictionary = {
 'Sign Up':'Sign Up',
 'Sign In':'Sign In',
 
+'title_drafts':'Drafts',
+
 
 'cont_type_name_plain':'Plain Text',
 'cont_type_name_html':'HTML',
