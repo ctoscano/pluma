@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# starts, stops, and restarts pluma
+#
+
+NAME=pluma
+DESC=pluma
+
+PID_FILE="/var/run/$NAME.pid"
+DAEMON="`dirname $0`/../example/manage.py"
+DAEMON_OPTIONS="runfcgi method=prefork host=127.0.0.1 port=8000 pidfile=$PID_FILE"
+
+start() {
+    if [ -f $PID_FILE ]; then
+        echo "$NAME was already running; try restart"
+        echo
+    else
+        `$DAEMON $DAEMON_OPTIONS`
+        echo "$NAME started"
+        echo
+    fi
+}
+
+stop() {
+    if [ -f $PID_FILE ]; then
+        kill `cat $PID_FILE`
+        rm $PID_FILE 
+        echo "$NAME stopped"
+    else 
+        echo "$NAME was not running"
+    fi
+    
+    echo
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart|reload)
+        stop
+        start
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|reload}"
+        exit 1
+esac
+
+exit 0
