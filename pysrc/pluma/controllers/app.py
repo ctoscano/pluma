@@ -67,6 +67,7 @@ def compose(request, id=None, draft=None, c=None):
         contrib.set_text(c.request.POST.get('content'))
         contrib.set_url(c.request.POST.get('domain', False),
                         c.request.POST.get('uri', False))
+        contrib.mode = c.request.POST.get('type', False) or contrib.mode or 'plain'
         if c.request.POST.get('save', False): # Save draft
             if hasattr(contrib, '_id'):       # Editing contribution's draft
                 Draft.save_draft(c.user, contrib)

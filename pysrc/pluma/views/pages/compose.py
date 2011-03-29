@@ -15,12 +15,29 @@ class Compose(Page):
         super(Compose, self).__init__(context, _('title_compose'))
         self.body.add(self._make_form())
         
+        self.head.addHTML('''
+        <script src="/js/jquery-1.5.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/mode-html.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/ace/theme-eclipse.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/pluma.js" type="text/javascript" charset="utf-8"></script>
+        <script>
+            window.onload = function () {
+                window.p = new Pluma({ace:true});
+                p.init();
+                p.initComposer('composer', 'basic_composer', 'composer_form');
+                p.setEditorMode('%(mode)s');
+            }
+        </script>
+        ''' % {'mode' : self.contrib.mode or 'plain'})
+        
     def _make_form(self):
-        form = new.form(method="POST")
+        form = new.form(id="composer_form", method="POST")
         
         form.add(csrf_token(self.c.request))
         form.add(new.input(type="text", name="title", value=self.contrib['title'] or 'title'))
-        form.add(new.textarea(name="content", style="width:100%;height:300px").
+        form.add(new.div(id="composer"))
+        form.add(new.textarea(id="basic_composer", name="content", style="width:100%;height:300px;position:relative;").
                  add(self.contrib.get_draft_text(self.c.user) or 'content'))
         form.add(new.button(type='submit').add(_('submit_publish')))
         form.add(new.input(type='submit', value=_('submit_save'), name="save"))
@@ -34,8 +51,8 @@ class Compose(Page):
         # only for new contributions
         #TODO: support some switching
         if '_id' not in self.contrib:
-            select = new.select(name='type')
-            for type in ('plain', 'html', 'markdown'):
+            select = new.select(id="type_select",name='type')
+            for type in ('plain', 'html', 'css', 'javascript', 'markdown'):
                 option = new.option(value=type).add(_('cont_type_name_%s' % type))
                 select.add(option)
             form.add(select)

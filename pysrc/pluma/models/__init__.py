@@ -22,6 +22,7 @@ class Contribution(Document):
     updated_date = DateTimeField(required=True, default=datetime.now)
     domain = StringField(required=False, db_field='D')
     uri = StringField(required=False, db_field='U')
+    mode = StringField(db_field='m')
     
     # Access information
     is_public = BooleanField(default=False)
