@@ -13,10 +13,14 @@ from django.contrib.auth import login, logout
 from pluma.views.pages.signin import SignIn
 from django.contrib.auth.decorators import login_required
 from pluma.views.pages.drafts import Drafts
+from pluma.views.pages.inbox import Inbox
 
 def index(request):
     c = Context(request)
-    page = Home(c, [] if c.user.is_anonymous() else c.user.get_inbox())
+    if c.user.is_anonymous():
+        page = Home(c, [])
+    else:
+        page = Inbox(c, c.user.get_inbox())
     return HttpResponse(page)
 
 def info(request):
@@ -135,6 +139,7 @@ def signout(request):
     logout(request)
     return HttpResponse('signed out')
 
+@login_required
 def inbox(request):
     return index(request)
 

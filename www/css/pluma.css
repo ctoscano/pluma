@@ -1,0 +1,12 @@
+.top {
+    width:100%,
+    height:40px;
+    min-width:500px;
+    text-align:right;
+}
+
+.lc {
+   width:200px;
+   float:left;
+   min-height:1px;
+}
