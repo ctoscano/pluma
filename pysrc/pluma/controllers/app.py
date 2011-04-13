@@ -14,6 +14,7 @@ from pluma.views.pages.signin import SignIn
 from django.contrib.auth.decorators import login_required
 from pluma.views.pages.drafts import Drafts
 from pluma.views.pages.inbox import Inbox
+from pluma.views.pages.inboxdocument import InboxDocument
 
 def index(request):
     c = Context(request)
@@ -142,6 +143,11 @@ def signout(request):
 @login_required
 def inbox(request):
     return index(request)
+
+@login_required
+def inbox_doc(request, id):
+    c = Context(request)
+    return HttpResponse(InboxDocument(c, id))
 
 def _404(request):
     return HttpResponse('not found', status=404)

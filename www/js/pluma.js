@@ -51,4 +51,10 @@ Pluma.prototype = {
 			this.editor.getSession().setMode(new Mode());
 		}
 	},
+	
+	resizeInboxDoc : function (iframe_id) {
+		var doc = document.getElementById(iframe_id);
+		doc.height = doc.contentWindow.document.body.scrollHeight;
+		doc.width = doc.contentWindow.document.body.scrollWidth;
+	},
 };

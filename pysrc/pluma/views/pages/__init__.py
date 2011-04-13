@@ -9,6 +9,7 @@ class Page(document):
     def __init__(self, context, title):
         self._top = None
         self._left = None
+        self._center = None
         
         super(Page, self).__init__()
         self.c = context
@@ -24,6 +25,7 @@ class Page(document):
         
         self.body.add(self.top)
         self.body.add(self.left)
+        self.body.add(self.center)
 
     @property
     def top(self):
@@ -41,3 +43,31 @@ class Page(document):
             self._left = new.div(cls='lc')
             
         return self._left
+    
+    @property
+    def center(self):
+        if self._center is None:
+            self._center = new.div(cls='cc')
+            
+        return self._center
+    
+class WorkPage(Page):
+    
+    def __init__(self, context, title):
+        super(WorkPage, self).__init__(context, title)
+        
+    @property
+    def left(self):
+        if self._left is None:
+            super(WorkPage, self).left
+            
+            table = VerticalTable()
+            self._left.add(table)
+            table.add(new.a(href=self.c.get_url('inbox')
+                                ).add('Inbox'))
+            table.add(new.a(href=self.c.get_url('compose')
+                            ).add('compose'))
+            table.add(new.a(href=self.c.get_url('drafts')
+                            ).add('drafts'))
+        return self._left
+    

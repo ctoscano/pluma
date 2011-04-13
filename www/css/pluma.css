@@ -10,3 +10,13 @@
    float:left;
    min-height:1px;
 }
+
+.cc {
+    margin-left:200px;
+}
+
+.inbox_doc {
+    border:none;
+    position:absolute;
+    left:200px;
+}

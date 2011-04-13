@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     # (r'^admin/', include(admin.site.urls)),
     
     url(r'^$', app.index, name='home'),
+    url(r'inbox/(?P<id>.*)', app.inbox_doc, name='inbox_doc'),
     url(r'inbox', app.inbox, name='inbox'),
     url(r'edit/(?P<id>.*)', app.compose, name='edit'),
     url(r'compose', app.compose, name='compose'),
