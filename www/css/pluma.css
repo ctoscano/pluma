@@ -19,4 +19,9 @@
     border:none;
     position:absolute;
     left:200px;
+    width:100%;
+}
+
+#basic_composer {
+    width:500px;
 }

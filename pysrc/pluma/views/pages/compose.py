@@ -37,7 +37,7 @@ class Compose(WorkPage):
         form.add(csrf_token(self.c.request))
         form.add(new.input(type="text", name="title", value=self.contrib['title'] or 'title'))
         form.add(new.div(id="composer"))
-        form.add(new.textarea(id="basic_composer", name="content", style="height:300px;position:relative;").
+        form.add(new.textarea(id="basic_composer", name="content", style="height:400px;position:relative;").
                  add(self.contrib.get_draft_text(self.c.user) or 'content'))
         form.add(new.button(type='submit').add(_('submit_publish')))
         form.add(new.input(type='submit', value=_('submit_save'), name="save"))
