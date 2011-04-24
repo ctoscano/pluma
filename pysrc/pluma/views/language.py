@@ -20,6 +20,7 @@ default_dictionary = {
 'submit_save':'Save',
 'discard':'Discard',
 'edit':'Edit',
+'is_public':'Make publicly available.',
 'domain':'Domain',
 'uri':'URI',
 'Sign Up':'Sign Up',

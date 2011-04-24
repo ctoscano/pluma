@@ -47,6 +47,12 @@ class Compose(WorkPage):
         form.add(new.input(type='text', value=self.contrib.domain or _('domain'), name="domain"))
         # Optional
         form.add(new.input(type='text', value=self.contrib.uri or _('uri'), name="uri"))
+        # Optional
+        is_public = new.input(id='is_public', type='checkbox', value='true', 
+                           name="is_public")
+        if self.contrib['is_public']: is_public.set(checked='checked')
+        form.add(is_public)
+        form.add(new.label(fr='is_public').add(_('is_public')))
         
         # only for new contributions
         #TODO: support some switching

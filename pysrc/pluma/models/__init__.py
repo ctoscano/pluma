@@ -89,6 +89,9 @@ class Contribution(Document):
             return True
         return False
     
+    def is_accessible(self, user):
+        return self.is_public or user in self.accessors
+    
     def get_text(self):
         '''must return a string'''
         return self.rendered_content

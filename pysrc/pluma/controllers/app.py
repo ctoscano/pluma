@@ -72,6 +72,7 @@ def compose(request, id=None, draft=None, c=None):
         contrib.set_text(c.request.POST.get('content'))
         contrib.set_url(c.request.POST.get('domain', False),
                         c.request.POST.get('uri', False))
+        contrib.is_public = (c.request.POST.get('is_public', 'false') == 'true')
         contrib.mode = c.request.POST.get('type', False) or contrib.mode or 'plain'
         if c.request.POST.get('save', False): # Save draft
             if hasattr(contrib, '_id'):       # Editing contribution's draft
@@ -105,7 +106,7 @@ def compose(request, id=None, draft=None, c=None):
 def doc(request, id, domain=None, uri=None):
     c = Context(request)
     doc = Contribution.factory(id, domain=domain, uri=uri)
-    if doc:
+    if doc and doc.is_accessible(c.user):
         return HttpResponse(doc.rendered_content, content_type=doc.content_type)
     else: 
         return _404(request)
