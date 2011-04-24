@@ -19,6 +19,7 @@ default_dictionary = {
 'submit_publish':'Publish!',
 'submit_save':'Save',
 'discard':'Discard',
+'edit':'Edit',
 'domain':'Domain',
 'uri':'URI',
 'Sign Up':'Sign Up',

@@ -5,6 +5,7 @@ Created on Nov 24, 2010
 '''
 from slique.html.html import new
 from pluma.views.pages import WorkPage
+from pluma.views.language import ukgettext as _
 
 class InboxDocument(WorkPage):
     
@@ -38,3 +39,4 @@ class InboxDocument(WorkPage):
             }
         </script>
         ''' % {'iframe_id' : 'inbox_doc'})
+        self.top.insert(0, new.a(href=self.c.get_url('edit', id=self.contribution_id)).add(_('edit')))
