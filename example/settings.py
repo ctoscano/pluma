@@ -1,14 +1,12 @@
 import os
 from local_settings import *
 
+PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
+
 # Django settings for pluma project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-
-ADMINS = (
-    ('Cesar Toscano', 'ctoscano@plu.ma'),
-)
 
 MANAGERS = ADMINS
 

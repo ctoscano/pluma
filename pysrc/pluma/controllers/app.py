@@ -3,6 +3,7 @@ Created on Nov 24, 2010
 
 @author: ctoscano
 '''
+from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from pluma.controllers import Context
 from pluma.views.pages.home import Home
@@ -17,16 +18,17 @@ from pluma.views.pages.inbox import Inbox
 from pluma.views.pages.inboxdocument import InboxDocument
 
 def index(request):
-    c = Context(request)
-    if c.user.is_anonymous():
-        page = Home(c, [])
+    if request.META['HTTP_HOST'] != settings.MAIN_DOMAIN:
+        return doc_in_domain(request, 'index')
     else:
-        page = Inbox(c, c.user.get_inbox())
-    return HttpResponse(page)
+        c = Context(request)
+        if c.user.is_anonymous():
+            page = Home(c, [])
+        else:
+            page = Inbox(c, c.user.get_inbox())
+        return HttpResponse(page)
 
 def info(request):
-    page = Home(Context(request))
-
     from slique.html.table import VerticalTable
     table = VerticalTable()
     table.add(request.environ)
@@ -35,8 +37,7 @@ def info(request):
     table.nextRow()
     table.add(request.path)
     
-    page.body.add(table)
-    return HttpResponse(page)
+    return HttpResponse(table)
 
 @login_required
 def drafts(request):
@@ -114,7 +115,7 @@ def doc(request, id, domain=None, uri=None):
 def doc_in_domain(request, uri):
     '''same as doc, but filters documents associated with a specific domain
     '''
-    domain = request.META['SERVER_NAME']
+    domain = request.META['HTTP_HOST']
     return doc(request, None, domain, uri)
 
 def signup(request):
