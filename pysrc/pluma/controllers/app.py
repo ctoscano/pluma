@@ -74,7 +74,8 @@ def compose(request, id=None, draft=None, c=None):
         contrib.set_url(c.request.POST.get('domain', False),
                         c.request.POST.get('uri', False))
         contrib.is_public = (c.request.POST.get('is_public', 'false') == 'true')
-        contrib.mode = c.request.POST.get('type', False) or contrib.mode or 'plain'
+        contrib.set_mode(c.request.POST.get('type', False) or contrib.mode or 'plain')
+        
         if c.request.POST.get('save', False): # Save draft
             if hasattr(contrib, '_id'):       # Editing contribution's draft
                 Draft.save_draft(c.user, contrib)

@@ -31,7 +31,7 @@ class Contribution(Document):
     # Content
     rendered_content = StringField(required=True, default='')
     
-    content_type = 'text/plain'
+    content_type = StringField(db_field='ct', default='text/plain')
     
     def __init__(self, **values):
         self._new_accessors = []
@@ -114,13 +114,21 @@ class Contribution(Document):
             return True
         else:
             return False
+        
+    def set_mode(self, mode):
+        self.mode = mode
+        if mode == 'css':
+            self.content_type = 'text/css'
+        elif mode == 'javascript':
+            self.content_type = 'text/javascript'
+            
 
 class HtmlContribution(Contribution):
-    content_type = 'text/html'
+    content_type = StringField(db_field='ct', default='text/html')
     
 class MarkdownContribution(Contribution):
     raw_content = StringField(required=True, default='')
-    content_type = 'text/html'
+    content_type = StringField(db_field='ct', default='text/html')
     
     def get_text(self):
         return self.raw_content
@@ -216,7 +224,7 @@ class PremiumEnvelope(Envelope):
     pass
 
 class GeneralEnvelope(Envelope):
-    '''Evenlope used in the standard mailbox.
+    '''Envelope used in the standard mailbox.
     '''
     recipient = ReferenceField(User)
     
