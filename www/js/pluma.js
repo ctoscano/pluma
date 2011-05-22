@@ -22,7 +22,7 @@ Pluma.prototype = {
 		    });
 		    
 		    $('#' + form_id).submit(function () {
-		    	basic_composer.html(editor.getSession().getValue());
+		    	basic_composer.text(editor.getSession().getValue());
 		    });
 		    
 		    $('input, textarea').attr('tabindex', 1);
