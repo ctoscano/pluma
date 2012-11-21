@@ -18,7 +18,7 @@ from pluma.views.pages.inbox import Inbox
 from pluma.views.pages.inboxdocument import InboxDocument
 
 def index(request):
-    if request.META['HTTP_HOST'] != settings.MAIN_DOMAIN:
+    if request.META['HTTP_HOST'].partition(':')[0] != settings.MAIN_DOMAIN:
         return doc_in_domain(request, 'index')
     else:
         c = Context(request)

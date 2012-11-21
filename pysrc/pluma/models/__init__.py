@@ -2,6 +2,7 @@ import re
 import pymongo
 import markdown
 from datetime import datetime, date, timedelta
+from bson import ObjectId
 
 from mongoengine import *
 from mongoengine.django.auth import User as Auth_User
@@ -43,7 +44,7 @@ class Contribution(Document):
             return None
         
         if id or (domain and uri):
-            query = {'_id': pymongo.objectid.ObjectId(id)}
+            query = {'_id': ObjectId(id)}
             if domain: 
                 query['D'] = domain
             if domain and uri:
@@ -194,7 +195,7 @@ class Draft(Document):
                                     'c':unicode(contrib._id)})
         elif hasattr(draft, '_id'):
             _get_db().draft.remove({'a':unicode(user._id),
-                                    '_id':pymongo.objectid.ObjectId(draft._id)})
+                                    '_id':ObjectId(draft._id)})
         
 
 class Envelope(Document):

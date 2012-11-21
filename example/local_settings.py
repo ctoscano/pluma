@@ -2,7 +2,7 @@ import mongoengine
 mongoengine.connect('pluma-example')
 
 
-MAIN_DOMAIN = 'cesar.plu.ma'
+MAIN_DOMAIN = 'ctoscano.plu.ma'
 
 ADMINS = (
     ('Cesar Toscano', 'ctoscano@plu.ma'),
